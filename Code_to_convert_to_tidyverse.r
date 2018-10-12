@@ -69,10 +69,14 @@ for(chr in all_chr){
 		count = length(subset$Family[subset$Family == trans])
 		comm_by_chromosome[comm_by_chromosome$Family == trans, chr]	= count
 	}
-
 }
 
 head(comm_by_chromosome) #dataframe with chr as columns and family counts in rows
 
 
 #challenge - one line the above with a groupby
+									     
+# This lil pipe does the job a simpler
+counts_chr = dat %>%
+  group_by(Chromosome, Family) %>%
+  count()
