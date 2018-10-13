@@ -1,3 +1,6 @@
+library(data.table)
+library(magrittr)
+
 load("subsampled.RM.out.RData")
 head(subsampled.RM.out)
 
@@ -154,6 +157,24 @@ library(microbenchmark)
 # the code below will take some time. Repeat only if you want to replicate it yourself
 # I just copy-pasted the above code inside the benchmark function
 
+
+jack = dat %>%
+  mutate(window = round(End/100000)*100000) %>%
+  group_by(Chromosome, window, Family) %>%
+  summarise(obs = n()) %>%
+  spread(Family, obs, fill = 0) %>% 
+  ungroup()
+
+dat2 <- as.data.table(dat)
+kennel <- dat2[, window := round(End, -5)] %>%
+  dcast(Chromosome+window~Family, 
+        value.var = 'window', 
+        fun.aggregate = length)
+
+# equivalent results
+all.equal(as.data.frame(jack), as.data.frame(kennel))
+
+
 speedcomp = microbenchmark(
   brent = lapply(split(dat, dat$Chromosome), function(y) t(sapply(split(y, list(cut(y[,"End"], as.integer(max(y$End)/as.integer(Window.Size))))), function(x) table(x$Family)))),
   karl = dat %>% group_by(Chromosome) %>% 
@@ -170,8 +191,14 @@ speedcomp = microbenchmark(
     group_by(Chromosome, window, Family) %>%
     summarise(obs = n()) %>%
     spread(Family, obs, fill = 0) %>% 
-    ungroup()
+    ungroup(),
+  kennel <- dat2[, window := round(End, -5)] %>%
+              dcast(Chromosome+window~Family, 
+                    value.var = 'window', 
+                    fun.aggregate = length),
+  times = 10
 )
+
 
 speedcomp
 # Unit: milliseconds
