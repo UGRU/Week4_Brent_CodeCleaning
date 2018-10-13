@@ -192,7 +192,7 @@ speedcomp = microbenchmark(
     summarise(obs = n()) %>%
     spread(Family, obs, fill = 0) %>% 
     ungroup(),
-  kennel <- dat2[, window := round(End, -5)] %>%
+  kennel = dat2[, window := round(End, -5)] %>%
               dcast(Chromosome+window~Family, 
                     value.var = 'window', 
                     fun.aggregate = length),
@@ -202,9 +202,10 @@ speedcomp = microbenchmark(
 
 speedcomp
 # Unit: milliseconds
-# expr     min      lq    mean  median      uq    max neval cld
-# brent 3240.68 3381.43 3501.63 3454.92 3602.44 4044.9   100   c
-# karl  135.40  170.27  211.79  184.75  208.34  455.1   100  b 
-# jack   30.95   34.33   64.51   35.93   75.25  322.0   100 a
+# expr        min         lq       mean     median         uq        max neval
+# brent 2112.20703 2134.67042 2229.21085 2210.63347 2229.02289 2617.13170    10
+# karl   88.08862   89.90596  125.59915   95.26605  131.61082  301.28707    10
+# jack   40.07870   40.25981   49.24898   40.69559   42.94650  119.14077    10
+# kennel   16.13447   16.49930   21.66882   18.35953   20.09653   54.88795    10
 
 # jack's code is the clear winner, one order of magnitude faster compared to karl's, and again compared to brent's!
